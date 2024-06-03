@@ -1,89 +1,125 @@
 #include <iostream>
 #include <stack>
+#include <string>
 
+/*
+ Algorithm:-
+ 1) Create 2 stacks, 1 for operands, 1 for operators
+ 2) loop thru expr, if e == operand, operand_stack.push(e)
+ 3) if e == operator, if operator_stack empty or operator_stack.peek().priority < e.priority or e == '('
+ 		operator_stack.push(e)
+ 4) else if e != ')' i.e. e.priority <= operator_stack.peek().priority then
+ 		while ( operator_stack.peek().priority >= e.priority) do
+			op = pop(operator_stack)
+			call func pop_and_eval(op) defined as:-
+			pop_and_eval(op) {
+				int2 = pop(operand_stack)
+				int1 = pop(operand_stack)
+				res = eval(int1, int2, op)
+				operand_stack.push(res)
+			}
+		operator_stack.push(e)
+ 5) else i.e. e == ')' then
+ 		while (operator_stack.peek() != '(') do
+			op = pop(operator_stack)
+			call func pop_and_eval(op) defined as:-
+			pop_and_eval(op) {
+				int2 = pop(operand_stack)
+				int1 = pop(operand_stack)
+				res = eval(int1, int2, op)
+				operand_stack.push(res)
+			}
+		operator_stack.pop()
+ 6) after loop finished,
+ 	while (operator_stack not_empty)
+		op = pop(operator_stack)
+		pop_and_eval(op)
+ 7) pop(operand_stack) is answer
+*/
 using namespace std;
 
-bool isOperator(char c) {
-	if (c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')')
+stack<int> a;
+stack<char> b;
+
+bool isOperand(char c) {
+	if ( c >= 48 && c <= 57 )
 		return true;
 	else
 		return false;
 }
 
-int getPriority(char c) {
-	if ( c == ')' || c == '(' )
-		return 0;
-	if ( c == '+' || c == '-' )
+int getPriority(char e) {
+	if (e == '+' || e == '-') {
 		return 1;
-	if ( c == '*' || c == '/' )
+	}
+	if (e == '*' || e == '/') {
 		return 2;
-}
-
-int miniEval(int int_1, int int_2, char c) {
-	if (c == '+')
-		return int_1 + int_2;
-	if (c == '-')
-		return int_1 - int_2;
-	if (c == '*')
-		return int_1*int_2;
-	if (c == '/')
-		return int_1/int_2;
+	}
 	return -1;
 }
 
-void pop_and_eval(stack<int> &operand_stack, char c) {
-	int int_2 = operand_stack.pop();
-	int int_1 = operand_stack.pop();
-	int res = miniEval(int_1, int_2, c);
-	operand_stack.push(res);
+int eval(int int1, int int2, char op) {
+	if (op == '+')
+		return int1+int2;
+	if (op == '-')
+		return int1-int2;
+	if (op == '*')
+		return int1*int2;
+	if (op == '/')
+		return int1/int2;
+	return -1;
 }
 
-int evaluate(char expr[], int n) {
-	stack<int> operand_stack;
-	stack<char> operator_stack;
+void pop_and_eval(char op) {
+	int int2 = a.top();
+	a.pop();
+	int int1 = a.top();
+	a.pop();
+	int res = eval(int1, int2, op);
+	a.push(res);
+}
 
-	for (int i=0; i<n; i++) {
-		if ( isOperator(expr[i]) ) {
-			if ( operator_stack.empty() || expr[i] == '(' )
-				operator_stack.push(expr[i]);
-			else if (expr[i] == ')') {
-				char pop_char = operator_stack.pop();
-				while ( pop_char != '(' ) {
-					pop_and_eval(operand_stack, pop_char);
-					pop_char = operator_stack.pop();
-				}
-			}
-			else {
-				char peek_char = operator_stack.top();
-				if (getPriority(peek_char) >= getPriority(expr[i]) ) {
-					char pop_char = operator_stack.pop();
-					while ( getPriority(pop_char) >= getPriority(expr[i]) ) {
-						pop_and_eval(operand_stack, pop_char);
-						pop_char = operator_stack.pop();
-					}
-					operator_stack.push(pop_char);
-				}
-				operator_stack.push(expr[i]);
-			}
+int infix_eval(string expr) {
+	for (char e : expr) {
+		if ( isOperand(e) ) {
+			a.push((int) (e - '0'));
 		}
 		else {
-			operand_stack.push(expr[i]);
+			if (b.empty() || getPriority(e) > getPriority(b.top()) || e == '(')
+				b.push(e);
+			else if ( e != ')' ) {
+				while ( getPriority(b.top()) >= getPriority(e) ) {
+					char op = b.top();
+					b.pop();
+					pop_and_eval(op);
+				}
+				b.push(e);
+			}
+			else {
+				char op;
+				while ( (op = b.top()) != '(' ) {
+					b.pop();
+					pop_and_eval(op);
+				}
+				b.pop();
+			}
 		}
 	}
 
-	while (!isEmpty(&operator_stack)) {
-		char c = operator_stack.pop();
-		pop_and_eval(operand_stack, c);
+	while (!b.empty()) {
+		char op = b.top();
+		b.pop();
+		pop_and_eval(op);
 	}
 
-	return operand_stack.pop();
+	return a.top();
 }
 
-int main() {
-	int n=11;
-	char expr[] = "2+(5-3*6/2)";
-
-	printf("%d\n", evaluate(expr, n));
+int main() {	
+	string expr = "2+(5-3*6/2)";
+	cout << "Input expression: eg- (" << expr << ") ";
+	if (!(cin >> expr))
+		expr = "2+(5-3*6/2)";
+	cout << infix_eval(expr) << '\n';
 	return 0;
 }
-
