@@ -117,7 +117,7 @@ int infix_eval(string expr) {
 
 int main() {	
 	string expr = "2+(5-3*6/2)";
-	cout << "Input expression: eg- (" << expr << ") ";
+	cout << "Input expression: eg- (" << expr << ")\n";
 	if (!(cin >> expr))
 		expr = "2+(5-3*6/2)";
 	cout << infix_eval(expr) << '\n';
