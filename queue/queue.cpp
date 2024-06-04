@@ -27,7 +27,7 @@ public:
 			this->arr[this->curr_size] = value;
 			this->curr_size++;
 		} else {
-			throw std::overflow_error("Tried to  into an already full queue.");
+			throw std::overflow_error("Tried to push into an already full queue.");
 		}
 	}
 	void dequeue() {	
