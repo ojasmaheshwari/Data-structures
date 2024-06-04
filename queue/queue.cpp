@@ -54,9 +54,9 @@ public:
 
 int main() {
 	Queue<std::string> my_queue(3);
-	my_queue.enqueue("ojas");
-	my_queue.enqueue("akash");
-	my_queue.enqueue("prabhdeep");
+	my_queue.enqueue("1st element");
+	my_queue.enqueue("2nd element");
+	my_queue.enqueue("3rd element");
 	std::cout << my_queue.peek() << '\n';
 	return 0;
 }
